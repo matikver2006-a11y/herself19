@@ -83,22 +83,15 @@ if st.button("🚀 Сгенерировать этикетки", type="primary",
                 )
                 
                 folder = generator.output_dir / composition
-                # ---- Проверка и вывод PDF-файлов ----
-                pdf_files = list(folder.glob("*.pdf"))
-                st.write("Найдено PDF-файлов:", len(pdf_files))
-                for file in pdf_files:
-                    st.write(file.name)
-                if not pdf_files:
-                    st.error("PDF-файлы не найдены! Проверьте работу генератора.")
-                elif count > 0:
-                    # ---- Архивирование ----
+                if folder.exists() and count > 0:
                     zip_buffer = io.BytesIO()
                     with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
-                        for file_path in pdf_files:
+                        # Сохраняем только PDF-файлы (PNG временные, они очищаются)
+                        for file_path in folder.glob("*.pdf"):
                             zip_file.write(file_path, file_path.name)
                     zip_buffer.seek(0)
                     generator.output_dir = original_output
-                    st.success(f"Создано {len(pdf_files)} PDF-этикеток!")
+                    st.success(f"Создано {count} этикеток!")
                     st.download_button(
                         label="📥 Скачать этикетки (ZIP)",
                         data=zip_buffer,
@@ -114,3 +107,4 @@ st.markdown(
     "<small style='color:#666;'>HERSELF19 Label Generator — онлайн и на телефоне</small>",
     unsafe_allow_html=True
 )
+
